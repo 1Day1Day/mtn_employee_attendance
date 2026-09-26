@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  STAFF
+  ADMIN
+}
+
+enum PersonType {
+  STAFF   // has a 5-digit staff ID
+  INTERN  // intern / NSP, no staff ID, verified by name + PIN
+}
+
+enum AccountStatus {
+  PENDING
+  APPROVED
+  DEACTIVATED
+}
+
+enum ClockMethod {
+  PHONE_QR
+  STATION
+  ADMIN_MANUAL
+}
+
+model User {
+  id           String        @id @default(cuid())
+  fullName     String
+  staffId      String?       @unique // 5 digits, null for interns/NSP
+  personType   PersonType    @default(STAFF)
+  passwordHash String
+  phone        String?
+  email        String?
+  department   String?
+  role         Role          @default(STAFF)
+  status       AccountStatus @default(PENDING)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  clockRecords ClockRecord[]
+  excusedDays  ExcusedDay[]
+
+  @@index([status])
+  @@index([personType])
+}
+
+model ClockRecord {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  type          String      // "IN" or "OUT"
+  method        ClockMethod
+  timestamp     DateTime    @default(now())
+  withinRange   Boolean?    // null for station/admin entries where GPS isn't checked
+  distanceMeters Int?
+  note          String?     // required for ADMIN_MANUAL entries
+  enteredById   String?     // admin who made a manual entry, if any
+
+  @@index([userId, timestamp])
+}
+
+// A day marked as excused for one person (approved leave/sick) or for
+// everyone at once (public holiday, when userId is null).
+model ExcusedDay {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  userId    String?  // null = applies to everyone (e.g. public holiday)
+  user      User?    @relation(fields: [userId], references: [id])
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@index([date])
+  @@index([userId])
+}
+
+// Single-row table holding branch location, radius and the absence threshold.
+model Settings {
+  id                String   @id @default("singleton")
+  branchLatitude    Float    @default(5.3018)
+  branchLongitude   Float    @default(-1.9930)
+  radiusMeters      Int      @default(100)
+  absenceThreshold  Int      @default(5)
+  updatedAt         DateTime @updatedAt
+}

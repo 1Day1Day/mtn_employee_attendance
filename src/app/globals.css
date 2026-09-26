@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  height: 100%;
+}
+
+body {
+  @apply bg-mtn-grey-light text-mtn-black font-sans;
+}
+
+/* Large tap targets on touch devices, per the styling plan */
+button, a.btn {
+  -webkit-tap-highlight-color: transparent;
+}
