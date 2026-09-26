@@ -1,10 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ClockButton from "@/components/ClockButton";
 
 export default function ClockPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-mtn-black" />}>
+      <ClockPageInner />
+    </Suspense>
+  );
+}
+
+function ClockPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -28,8 +36,13 @@ export default function ClockPage() {
   if (!token) {
     return (
       <Centered>
-        <p className="text-center text-mtn-grey">
+        <p className="text-center text-mtn-grey mb-4">
           Please scan today&apos;s QR code at the branch to clock in or out.
+        </p>
+        <p className="text-center text-sm">
+          <a href="/login" className="underline font-medium">
+            Sign in
+          </a>
         </p>
       </Centered>
     );
