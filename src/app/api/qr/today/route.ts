@@ -8,8 +8,4 @@ export async function GET() {
   if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const token = generateDailyQrToken();
-  const url = `${process.env.NEXT_PUBLIC_APP_URL}/clock?token=${token}`;
-  const dataUrl = await QRCode.toDataURL(url, { width: 400, margin: 2 });
-
-  return NextResponse.json({ dataUrl, url });
 }
