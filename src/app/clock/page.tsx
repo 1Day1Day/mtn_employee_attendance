@@ -36,14 +36,26 @@ function ClockPageInner() {
   if (!token) {
     return (
       <Centered>
-        <p className="text-center text-mtn-grey mb-4">
-          Please scan today&apos;s QR code at the branch to clock in or out.
+        <WelcomeIcon />
+        <h2 className="text-center font-bold text-lg mt-4 mb-1">Welcome</h2>
+        <p className="text-center text-mtn-grey text-sm mb-6">
+          Scan today&apos;s QR code at the branch entrance to clock in or out.
         </p>
-        <p className="text-center text-sm">
-          <a href="/login" className="underline font-medium">
+        <LiveClock />
+        <div className="flex flex-col gap-2 mt-6">
+          <a
+            href="/login"
+            className="text-center bg-mtn-yellow text-mtn-black font-semibold py-2.5 rounded-lg"
+          >
             Sign in
           </a>
-        </p>
+          <a
+            href="/register"
+            className="text-center bg-mtn-grey-light text-mtn-black font-medium py-2.5 rounded-lg"
+          >
+            Register
+          </a>
+        </div>
       </Centered>
     );
   }
@@ -85,6 +97,39 @@ function ClockPageInner() {
         }}
       />
     </Centered>
+  );
+}
+
+function LiveClock() {
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="text-center">
+      <div className="text-2xl font-bold tabular-nums text-mtn-black">
+        {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+      </div>
+      <div className="text-xs text-mtn-grey mt-0.5">
+        {now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}
+      </div>
+    </div>
+  );
+}
+
+function WelcomeIcon() {
+  return (
+    <div className="w-16 h-16 rounded-2xl bg-mtn-yellow flex items-center justify-center mx-auto">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="2">
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z" />
+      </svg>
+    </div>
   );
 }
 
